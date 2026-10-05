@@ -7,7 +7,7 @@
         <h2>Reportar una falla</h2>
 
         {{-- Validación por parte del Laravel en el servidor --}}
-        <form action="{{ route('reportes.store') }}" method="POST" novalidate>
+        <form action="{{ route('reportes.store') }}" method="POST" id="form-reporte" novalidate>
             {{-- Protección CSRF --}}
             @csrf
 

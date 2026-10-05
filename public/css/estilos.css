@@ -57,3 +57,27 @@ footer .credito { font-size: 11px; }
     header { text-align: center; }
     nav a { margin: 0 8px; }
 }
+
+/* ---------- Ubicación ---------- */
+#mapa { height: 450px; width: 100%; border-radius: 8px; border: 1px solid #ccc; }
+.nota-mapa { font-size: 13px; color: #666; text-align: center; margin: 8px 0 0 0; }
+.texto-justificado { text-align: justify; }
+
+/* ---------- Historia ---------- */
+.bloque-historia { display: flex; gap: 20px; align-items: flex-start; }
+.bloque-historia img { width: 280px; max-width: 40%; border: 1px solid gray; border-radius: 8px; }
+.bloque-historia p { text-align: justify; margin-top: 0; }
+.bloque-historia h2 { text-align: left; }
+
+.tabla-cronologia { width: 100%; border-collapse: collapse; }
+.tabla-cronologia td { padding: 8px 10px; border-top: 1px solid #ddd; vertical-align: top; }
+.tabla-cronologia td:first-child { color: goldenrod; font-weight: bold; white-space: nowrap; }
+
+/* ---------- Campo vacío (aviso de JavaScript) ---------- */
+.campo-vacio { border: 2px solid #dc3545 !important; background: #fff5f5; }
+
+@media (max-width: 700px) {
+    .bloque-historia { flex-direction: column; }
+    .bloque-historia img { width: 100%; max-width: 100%; }
+    #mapa { height: 320px; }
+}
