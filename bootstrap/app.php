@@ -11,7 +11,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Middleware
+        $middleware->alias([
+            'limitar.reportes' => \App\Http\Middleware\LimitarReportes::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

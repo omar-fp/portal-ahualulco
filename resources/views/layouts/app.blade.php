@@ -45,24 +45,7 @@
         </aside>
 
         <main class="principal">
-            {{-- Mensaje guardado en la sesión (flash) --}}
-            @if (session('exito'))
-                <div class="alerta exito">
-                    {{ session('exito') }}
-                    Tu folio de seguimiento es: <strong>{{ session('folio') }}</strong>
-                </div>
-            @endif
-
-            {{-- Errores de validación --}}
-            @if ($errors->any())
-                <div class="alerta error">
-                    <ul>
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            @include('partials.mensajes')
 
             @yield('contenido')
         </main>

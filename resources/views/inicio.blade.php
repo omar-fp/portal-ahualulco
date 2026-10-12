@@ -6,8 +6,6 @@
     <div class="tarjeta">
         <h2>Noticias Recientes</h2>
 
-        {{-- Por ahora las noticias están escritas aquí directamente.
-             Más adelante el administrador las podrá crear y editar desde su panel. --}}
         <article class="noticia">
             <p class="fecha">Abr 24, 2025</p>
             <h3>Firman convenio para fortalecer el desarrollo laboral en Ahualulco.</h3>
