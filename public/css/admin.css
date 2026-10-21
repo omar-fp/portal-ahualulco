@@ -1,0 +1,17 @@
+/* ---------- Panel de administración ---------- */
+.form-salir { display: inline; margin-left: 25px; }
+.form-salir button { background: none; border: none; padding: 0; cursor: pointer; color: #3a87b7;
+                     font: bold 14px "Times New Roman", serif; text-transform: uppercase; }
+.form-salir button:hover { text-decoration: underline; }
+
+.filtro { margin-bottom: 15px; }
+.filtro select { width: auto; }
+
+.boton-chico { padding: 5px 12px; background: #3a87b7; color: white; border: none; border-radius: 4px; cursor: pointer; }
+
+.tabla-scroll { overflow-x: auto; margin-top: 10px; }
+.tabla { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tabla th, .tabla td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; vertical-align: top; }
+.tabla th { background: #eaf0f7; color: #3a87b7; }
+.form-estado { display: flex; gap: 5px; align-items: center; }
+.form-estado select { width: auto; margin: 0; }

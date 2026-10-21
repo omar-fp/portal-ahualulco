@@ -6,11 +6,14 @@
     </div>
 @endif
 
+@if (session('aviso'))
+    <div class="alerta exito">{{ session('aviso') }}</div>
+@endif
+
 @if (session('error'))
     <div class="alerta error">{{ session('error') }}</div>
 @endif
 
-{{-- Errores de validación --}}
 @if ($errors->any())
     <div class="alerta error">
         <ul>

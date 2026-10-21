@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('titulo') | Portal Municipal Ahualulco</title>
     <link rel="stylesheet" href="{{ asset('css/estilos.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/admin.css') }}">
     @stack('estilos')
 </head>
 <body>
@@ -15,6 +16,17 @@
             <a href="{{ route('ubicacion') }}">Ubicación</a>
             <a href="{{ route('seguimiento') }}">Consultar folio</a>
             <a href="{{ route('reportes.create') }}" class="boton-nav">Reportar una falla</a>
+            
+            @auth
+                <a href="{{ route('admin.reportes.index') }}">Panel</a>
+                @if (auth()->user()->esSuper())
+                    <a href="{{ route('admin.administradores.index') }}">Administradores</a>
+                @endif
+                <form action="{{ route('logout') }}" method="POST" class="form-salir">
+                    @csrf
+                    <button type="submit">Cerrar sesión</button>
+                </form>
+            @endauth
         </nav>
     </header>
 

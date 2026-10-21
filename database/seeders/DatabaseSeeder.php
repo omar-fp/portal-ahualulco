@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TipoReporteSeeder::class,
             ColoniasSeeder::class,
+            AdministradoresSeeder::class,
         ]);
     }
 }

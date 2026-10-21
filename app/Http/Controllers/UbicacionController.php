@@ -6,15 +6,13 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class UbicacionController extends Controller
-{
+class UbicacionController extends Controller {
     // Coordenadas de la cabecera municipal 
     private $latitud = 20.7019;
     private $longitud = -103.9736;
 
     // Muestra el mapa del municipio
-    public function index()
-    {
+    public function index() {
         $mapa = [
             'latitud'  => $this->latitud,
             'longitud' => $this->longitud,
@@ -25,8 +23,7 @@ class UbicacionController extends Controller
     }
 
 
-    private function buscarLimite()
-    {
+    private function buscarLimite() {
         return Cache::remember('limite_ahualulco', now()->addDay(), function () {
             try {
                 $respuesta = Http::withHeaders(['User-Agent' => 'PortalAhualulco/1.0 (proyecto escolar CUValles)'])
