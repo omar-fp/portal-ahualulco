@@ -11,6 +11,13 @@
             @endif
         </h2>
 
+        {{-- Resumen por estado (Collection calculada en el controlador) --}}
+        <p>
+            Pendientes: <strong>{{ $resumen->get('pendiente', 0) }}</strong> ·
+            En proceso: <strong>{{ $resumen->get('en_proceso', 0) }}</strong> ·
+            Atendidos: <strong>{{ $resumen->get('atendido', 0) }}</strong>
+        </p>
+
         <form action="{{ route('admin.reportes.index') }}" method="GET" class="filtro">
             <label for="estado">Estado:</label>
             <select name="estado" id="estado">
@@ -25,7 +32,7 @@
         @if ($reportes->isEmpty())
             <p>No hay reportes para mostrar.</p>
         @else
-            <p>Total de reportes: <strong>{{ $reportes->total() }}</strong></p>
+            <p>Total de reportes en esta lista: <strong>{{ $reportes->total() }}</strong></p>
 
             <div class="tabla-scroll">
                 <table class="tabla">
@@ -64,6 +71,7 @@
                                 </td>
                                 @if (auth()->user()->esSuper())
                                     <td>
+                                        {{-- Solo se pueden eliminar los reportes ya atendidos --}}
                                         @if ($reporte->estado == 'atendido')
                                             <form action="{{ route('admin.reportes.destroy', $reporte) }}" method="POST"
                                                   onsubmit="return confirm('¿Eliminar el reporte {{ $reporte->folio }}? Esta acción no se puede deshacer.');">

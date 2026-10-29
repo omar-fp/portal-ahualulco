@@ -15,9 +15,19 @@ class ReporteAdminController extends Controller
         'atendido'   => 'Atendido',
     ];
 
-    public function index(Request $request) {
+    // Lista los reportes: el super ve todos; el de área, solo los de su tipo
+    public function index(Request $request)
+    {
         $usuario = $request->user();
 
+        // Collections: se cuenta cuántos reportes hay por estado para el resumen
+        $todos = Reporte::query();
+        if (! $usuario->esSuper()) {
+            $todos->where('tipo_reporte_id', $usuario->tipo_reporte_id);
+        }
+        $resumen = $todos->pluck('estado')->countBy();
+
+        // Lista que se muestra en la tabla
         $consulta = Reporte::with(['tipo', 'colonia'])->latest();
 
         if (! $usuario->esSuper()) {
@@ -28,16 +38,25 @@ class ReporteAdminController extends Controller
             $consulta->where('estado', $request->estado);
         }
 
+        // 10 reportes por página; withQueryString conserva el filtro al cambiar de página
         $reportes = $consulta->paginate(10)->withQueryString();
         $estados = $this->estados;
 
-        return view('admin.reportes.index', compact('reportes', 'estados'));
+        return view('admin.reportes.index', compact('reportes', 'estados', 'resumen'));
     }
 
-    public function actualizarEstado(Request $request, Reporte $reporte) {
+    // Cambia el estado de un reporte
+    public function actualizarEstado(Request $request, Reporte $reporte)
+    {
         $usuario = $request->user();
 
+        // Un administrador de área no puede tocar reportes de otro tipo (aunque escriba la URL)
         if (! $usuario->esSuper() && $reporte->tipo_reporte_id != $usuario->tipo_reporte_id) {
+            Log::warning('Intento no autorizado de modificar un reporte', [
+                'usuario' => $usuario->email,
+                'folio'   => $reporte->folio,
+            ]);
+
             return redirect()->route('admin.reportes.index')
                 ->with('error', 'No tienes permiso para modificar ese reporte.');
         }
@@ -49,23 +68,46 @@ class ReporteAdminController extends Controller
             'in'       => 'Selecciona un estado válido.',
         ]);
 
-        $reporte->estado = $request->estado;
-        $reporte->save();
+        try {
+            $reporte->estado = $request->estado;
+            $reporte->save();
+        } catch (\Exception $e) {
+            Log::error('No se pudo actualizar el estado del reporte', [
+                'folio' => $reporte->folio,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->with('error', 'No se pudo actualizar el reporte. Intenta de nuevo.');
+        }
+
+        Log::info('Estado de reporte modificado', [
+            'folio'   => $reporte->folio,
+            'estado'  => $reporte->estado,
+            'usuario' => $usuario->email,
+        ]);
 
         return back()->with('aviso', 'El reporte ' . $reporte->folio . ' ahora está: ' . $reporte->nombreEstado() . '.');
     }
 
-    // Eliminar un reporte (solo el administrador general y solo si ya fue atendido)
-    public function destroy(Reporte $reporte)
+    // Elimina un reporte (la ruta ya es solo para el administrador general)
+    public function destroy(Request $request, Reporte $reporte)
     {
+        // Solo se pueden eliminar los reportes que ya fueron atendidos
         if ($reporte->estado != 'atendido') {
             return back()->with('error', 'Solo se pueden eliminar reportes con estado Atendido.');
         }
 
         $folio = $reporte->folio;
-        $reporte->delete();
 
-        Log::info('Reporte eliminado', ['folio' => $folio]);
+        try {
+            $reporte->delete();
+        } catch (\Exception $e) {
+            Log::error('No se pudo eliminar el reporte', ['folio' => $folio, 'error' => $e->getMessage()]);
+
+            return back()->with('error', 'No se pudo eliminar el reporte. Intenta de nuevo.');
+        }
+
+        Log::info('Reporte eliminado', ['folio' => $folio, 'usuario' => $request->user()->email]);
 
         return back()->with('aviso', 'El reporte ' . $folio . ' fue eliminado.');
     }

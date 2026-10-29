@@ -15,6 +15,7 @@
                         <th>Nombre</th>
                         <th>Correo</th>
                         <th>Tipo</th>
+                        <th>Eliminar</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -27,6 +28,18 @@
                                     General (todos los reportes)
                                 @else
                                     {{ $admin->tipoReporte->nombre }}
+                                @endif
+                            </td>
+                            <td>
+                                @if ($admin->id == auth()->user()->id)
+                                    Tu cuenta
+                                @else
+                                    <form action="{{ route('admin.administradores.destroy', $admin) }}" method="POST"
+                                          onsubmit="return confirm('¿Eliminar al administrador {{ $admin->email }}? Esta acción no se puede deshacer.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="boton-chico boton-peligro">Eliminar</button>
+                                    </form>
                                 @endif
                             </td>
                         </tr>

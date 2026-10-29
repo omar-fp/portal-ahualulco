@@ -14,14 +14,20 @@
             <a href="{{ route('inicio') }}">Home</a>
             <a href="{{ route('historia') }}">Historia</a>
             <a href="{{ route('ubicacion') }}">Ubicación</a>
-            <a href="{{ route('seguimiento') }}">Consultar folio</a>
-            <a href="{{ route('reportes.create') }}" class="boton-nav">Reportar una falla</a>
-            
+
+            {{-- Visitantes--}}
+            @guest
+                <a href="{{ route('seguimiento') }}">Consultar folio</a>
+                <a href="{{ route('reportes.create') }}" class="boton-nav">Reportar una falla</a>
+            @endguest
+
+            {{-- Admin--}}
             @auth
                 <a href="{{ route('admin.reportes.index') }}">Panel</a>
                 @if (auth()->user()->esSuper())
                     <a href="{{ route('admin.administradores.index') }}">Administradores</a>
                 @endif
+                <a href="{{ route('admin.contrasena.edit') }}">Mi contraseña</a>
                 <form action="{{ route('logout') }}" method="POST" class="form-salir">
                     @csrf
                     <button type="submit">Cerrar sesión</button>

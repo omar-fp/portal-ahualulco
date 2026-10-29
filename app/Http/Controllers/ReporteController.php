@@ -2,26 +2,37 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Colonia; 
+use App\Models\Colonia;
 use App\Models\Reporte;
 use App\Models\TipoReporte;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ReporteController extends Controller
-{
-
-    public function create()
-    {
+class ReporteController extends Controller {
+    public function create() {
         $tipos = TipoReporte::orderBy('nombre')->get();
-        $colonias = Colonia::orderBy('colonias')->get(); 
+        $colonias = Colonia::orderBy('colonias')->get();
 
-        return view('reportes.create', compact('tipos', 'colonias')); 
+        return view('reportes.create', compact('tipos', 'colonias'));
     }
 
+    // Quita etiquetas HTML y espacios sobrantes de un texto
+    private function limpiar($texto) {
+        if (! is_string($texto)) {
+            return '';
+        }
 
-    public function store(Request $request)
-    {
+        return trim(strip_tags($texto));
+    }
+
+    public function store(Request $request) {
+        // Se quitan las etiquetas HTML de lo que escribe el ciudadano
+        $request->merge([
+            'nombre_ciudadano' => $this->limpiar($request->input('nombre_ciudadano')),
+            'calle'            => $this->limpiar($request->input('calle')),
+            'descripcion'      => $this->limpiar($request->input('descripcion')),
+        ]);
+
         // Validación de los datos enviados
         $request->validate([
             'tipo_reporte_id'  => 'required|exists:tipo_reportes,id',
@@ -48,7 +59,16 @@ class ReporteController extends Controller
         $reporte->calle = $request->input('calle');
         $reporte->colonia_id = $request->input('colonia_id');
         $reporte->descripcion = $request->input('descripcion');
-        $reporte->save();
+
+        // Si falla el guardado, se avisa al usuario y se registra el error en el log
+        try {
+            $reporte->save();
+        } catch (\Exception $e) {
+            Log::error('No se pudo guardar el reporte', ['error' => $e->getMessage()]);
+
+            return back()->withInput()
+                ->with('error', 'No se pudo registrar tu reporte. Intenta de nuevo más tarde.');
+        }
 
         Log::info('Reporte ciudadano creado', ['folio' => $reporte->folio]);
 
@@ -59,8 +79,7 @@ class ReporteController extends Controller
             ->with('folio', $reporte->folio);
     }
 
-    public function seguimiento(Request $request)
-    {
+    public function seguimiento(Request $request) {
         $reporte = null;
         $buscado = false;
         $folio = '';
@@ -85,8 +104,7 @@ class ReporteController extends Controller
         return view('reportes.seguimiento', compact('reporte', 'buscado', 'folio'));
     }
 
-    public function estado($folio)
-    {
+    public function estado($folio) {
         $reporte = Reporte::where('folio', strtoupper($folio))->first();
 
         if ($reporte == null) {

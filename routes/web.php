@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdministradorController;
+use App\Http\Controllers\Admin\CuentaController;
 use App\Http\Controllers\Admin\ReporteAdminController;
 use App\Http\Controllers\HistoriaController;
 use App\Http\Controllers\InicioController;
@@ -16,7 +17,7 @@ Route::get('/', [InicioController::class, 'index'])->name('inicio');
 Route::get('/historia', [HistoriaController::class, 'index'])->name('historia');
 Route::get('/ubicacion', [UbicacionController::class, 'index'])->name('ubicacion');
 
-// Formulario para reportar una falla y guardar el reporte 
+// Formulario para reportar una falla (GET) y guardar el reporte (POST)
 Route::get('/reportes/crear', [ReporteController::class, 'create'])->name('reportes.create');
 
 // middleware para no permitir enviar dos reportes seguidos muy rápido
@@ -30,9 +31,6 @@ Route::get('/seguimiento', [ReporteController::class, 'seguimiento'])->name('seg
 // Respuesta en formato JSON
 Route::get('/reportes/{folio}/estado', [ReporteController::class, 'estado'])->name('reportes.estado');
 
-
-
-
 // ---------- Acceso de administradores ----------
 // No hay ningún enlace público a /login: se entra escribiendo la dirección.
 Route::middleware('guest')->group(function () {
@@ -43,17 +41,23 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
-// ---------- Panel----------
+// ---------- Panel (requiere haber iniciado sesión) ----------
 Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Admin general y admin de área (cada uno ve lo que le corresponde)
     Route::get('/reportes', [ReporteAdminController::class, 'index'])->name('reportes.index');
     Route::patch('/reportes/{reporte}/estado', [ReporteAdminController::class, 'actualizarEstado'])->name('reportes.estado');
 
-    // Solo el administrador general
-    Route::middleware('super')->group(function () {
-        Route::delete('/reportes/{reporte}', [ReporteAdminController::class, 'destroy'])->name('reportes.destroy');
-        Route::get('/administradores', [AdministradorController::class, 'index'])->name('administradores.index');
-        Route::get('/administradores/crear', [AdministradorController::class, 'create'])->name('administradores.create');
-        Route::post('/administradores', [AdministradorController::class, 'store'])->name('administradores.store');
+    // Cambio de contraseña del usuario con sesión iniciada
+    Route::get('/contrasena', [CuentaController::class, 'editarContrasena'])->name('contrasena.edit');
+    Route::put('/contrasena', [CuentaController::class, 'actualizarContrasena'])->name('contrasena.update');
+
+    // Solo el administrador general (middleware "super")
+Route::middleware('super')->group(function () {
+    Route::delete('/reportes/{reporte}', [ReporteAdminController::class, 'destroy'])->name('reportes.destroy');
+
+    Route::get('/administradores', [AdministradorController::class, 'index'])->name('administradores.index');
+    Route::get('/administradores/crear', [AdministradorController::class, 'create'])->name('administradores.create');
+    Route::post('/administradores', [AdministradorController::class, 'store'])->name('administradores.store');
+    Route::delete('/administradores/{administrador}', [AdministradorController::class, 'destroy'])->name('administradores.destroy');
     });
 });

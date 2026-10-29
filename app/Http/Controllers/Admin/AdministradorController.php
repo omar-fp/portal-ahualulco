@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\TipoReporte;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AdministradorController extends Controller
 {
+    // Lista de administradores
     public function index()
     {
         $administradores = User::with('tipoReporte')->orderBy('name')->get();
@@ -51,15 +53,50 @@ class AdministradorController extends Controller
             'tipo_reporte_id' => 'tipo de reporte',
         ]);
 
-        $usuario = new User();
-        $usuario->name = $request->name;
-        $usuario->email = $request->email;
-        $usuario->password = $request->password; // se guarda con hash automáticamente
-        $usuario->rol = $request->rol;
-        $usuario->tipo_reporte_id = $request->rol == 'area' ? $request->tipo_reporte_id : null;
-        $usuario->save();
+        try {
+            $usuario = new User();
+            $usuario->name = strip_tags($request->name);
+            $usuario->email = $request->email;
+            $usuario->password = $request->password; // se guarda con hash automáticamente
+            $usuario->rol = $request->rol;
+            $usuario->tipo_reporte_id = $request->rol == 'area' ? $request->tipo_reporte_id : null;
+            $usuario->save();
+        } catch (\Exception $e) {
+            Log::error('No se pudo crear el administrador', ['error' => $e->getMessage()]);
+
+            return back()->withInput()->with('error', 'No se pudo crear el administrador. Intenta de nuevo.');
+        }
+
+        Log::info('Administrador creado', [
+            'nuevo'      => $usuario->email,
+            'rol'        => $usuario->rol,
+            'creado_por' => $request->user()->email,
+        ]);
 
         return redirect()->route('admin.administradores.index')
             ->with('aviso', 'Administrador creado correctamente.');
+    }
+
+    // Elimina un administrador
+    public function destroy(Request $request, User $administrador)
+    {
+        // No se puede eliminar la cuenta con la que se inició sesión
+        if ($administrador->id == $request->user()->id) {
+            return back()->with('error', 'No puedes eliminar tu propia cuenta.');
+        }
+
+        $correo = $administrador->email;
+
+        try {
+            $administrador->delete();
+        } catch (\Exception $e) {
+            Log::error('No se pudo eliminar al administrador', ['correo' => $correo, 'error' => $e->getMessage()]);
+
+            return back()->with('error', 'No se pudo eliminar al administrador. Intenta de nuevo.');
+        }
+
+        Log::info('Administrador eliminado', ['eliminado' => $correo, 'eliminado_por' => $request->user()->email]);
+
+        return back()->with('aviso', 'El administrador ' . $correo . ' fue eliminado.');
     }
 }

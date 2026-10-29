@@ -17,5 +17,6 @@
 
             <button type="submit" class="boton">Entrar</button>
         </form>
+
     </div>
 @endsection
