@@ -51,6 +51,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Solo el administrador general
     Route::middleware('super')->group(function () {
+        Route::delete('/reportes/{reporte}', [ReporteAdminController::class, 'destroy'])->name('reportes.destroy');
         Route::get('/administradores', [AdministradorController::class, 'index'])->name('administradores.index');
         Route::get('/administradores/crear', [AdministradorController::class, 'create'])->name('administradores.create');
         Route::post('/administradores', [AdministradorController::class, 'store'])->name('administradores.store');

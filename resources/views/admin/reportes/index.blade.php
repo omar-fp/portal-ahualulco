@@ -25,6 +25,8 @@
         @if ($reportes->isEmpty())
             <p>No hay reportes para mostrar.</p>
         @else
+            <p>Total de reportes: <strong>{{ $reportes->total() }}</strong></p>
+
             <div class="tabla-scroll">
                 <table class="tabla">
                     <thead>
@@ -35,6 +37,9 @@
                             <th>Descripción</th>
                             <th>Fecha</th>
                             <th>Estado</th>
+                            @if (auth()->user()->esSuper())
+                                <th>Eliminar</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
@@ -57,11 +62,27 @@
                                         <button type="submit" class="boton-chico">Guardar</button>
                                     </form>
                                 </td>
+                                @if (auth()->user()->esSuper())
+                                    <td>
+                                        @if ($reporte->estado == 'atendido')
+                                            <form action="{{ route('admin.reportes.destroy', $reporte) }}" method="POST"
+                                                  onsubmit="return confirm('¿Eliminar el reporte {{ $reporte->folio }}? Esta acción no se puede deshacer.');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="boton-chico boton-peligro">Eliminar</button>
+                                            </form>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                @endif
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+
+            {{ $reportes->links('partials.paginacion') }}
         @endif
     </div>
 @endsection

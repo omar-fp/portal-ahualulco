@@ -8,6 +8,7 @@
 .filtro select { width: auto; }
 
 .boton-chico { padding: 5px 12px; background: #3a87b7; color: white; border: none; border-radius: 4px; cursor: pointer; }
+.boton-peligro { background: #b03a3a; }
 
 .tabla-scroll { overflow-x: auto; margin-top: 10px; }
 .tabla { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -15,3 +16,11 @@
 .tabla th { background: #eaf0f7; color: #3a87b7; }
 .form-estado { display: flex; gap: 5px; align-items: center; }
 .form-estado select { width: auto; margin: 0; }
+
+/* ---------- Paginación ---------- */
+.paginacion { margin-top: 15px; display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.paginacion a, .paginacion span { padding: 5px 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+.paginacion a { color: #3a87b7; text-decoration: none; }
+.paginacion a:hover { background: #eaf0f7; }
+.paginacion .actual { background: #3a87b7; color: white; border-color: #3a87b7; }
+.paginacion .desactivado { color: #999; }

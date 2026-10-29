@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Reporte;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ReporteAdminController extends Controller
 {
@@ -14,9 +15,9 @@ class ReporteAdminController extends Controller
         'atendido'   => 'Atendido',
     ];
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $usuario = $request->user();
+
         $consulta = Reporte::with(['tipo', 'colonia'])->latest();
 
         if (! $usuario->esSuper()) {
@@ -27,14 +28,13 @@ class ReporteAdminController extends Controller
             $consulta->where('estado', $request->estado);
         }
 
-        $reportes = $consulta->get();
+        $reportes = $consulta->paginate(10)->withQueryString();
         $estados = $this->estados;
 
         return view('admin.reportes.index', compact('reportes', 'estados'));
     }
 
-    public function actualizarEstado(Request $request, Reporte $reporte)
-    {
+    public function actualizarEstado(Request $request, Reporte $reporte) {
         $usuario = $request->user();
 
         if (! $usuario->esSuper() && $reporte->tipo_reporte_id != $usuario->tipo_reporte_id) {
@@ -53,5 +53,20 @@ class ReporteAdminController extends Controller
         $reporte->save();
 
         return back()->with('aviso', 'El reporte ' . $reporte->folio . ' ahora está: ' . $reporte->nombreEstado() . '.');
+    }
+
+    // Eliminar un reporte (solo el administrador general y solo si ya fue atendido)
+    public function destroy(Reporte $reporte)
+    {
+        if ($reporte->estado != 'atendido') {
+            return back()->with('error', 'Solo se pueden eliminar reportes con estado Atendido.');
+        }
+
+        $folio = $reporte->folio;
+        $reporte->delete();
+
+        Log::info('Reporte eliminado', ['folio' => $folio]);
+
+        return back()->with('aviso', 'El reporte ' . $folio . ' fue eliminado.');
     }
 }
