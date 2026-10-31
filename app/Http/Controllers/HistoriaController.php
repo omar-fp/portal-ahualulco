@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-class HistoriaController extends Controller
-{
+class HistoriaController extends Controller {
     // Muestra la página de historia del municipio
-    public function index()
-    {
+    public function index() {
         // Cronología de hechos: año y descripción
         $cronologia = [
             ['1531', 'Juan de Escárcena llevó a cabo la fundación hispánica.'],

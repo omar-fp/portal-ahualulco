@@ -55,10 +55,20 @@
             <details open>
                 <summary>Contacto</summary>
                 <ul>
-                    <li>Telefono</li>
-                    <li>Correo</li>
-                    <li>Direccion</li>
-                </ul>
+              <li><a href="tel:3867520158">Telefono</a></li>
+              <li>
+                <a href="mailto:gobiernodeahualulco@ahualulcodemercado.gob.mx"
+                  >Correo</a
+                >
+              </li>
+              <li>
+                <a
+                  href="https://www.google.com/maps?q=Dr.+Gonzalez+Madrid+11,+Centro,+46730+Ahualulco+de+Mercado,+Jalisco"
+                  target="_blank"
+                  >Direccion</a
+                >
+              </li>
+            </ul>
             </details>
         </aside>
 
