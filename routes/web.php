@@ -30,6 +30,7 @@ Route::get('/seguimiento', [ReporteController::class, 'seguimiento'])->name('seg
 
 // Respuesta en formato JSON
 Route::get('/reportes/{folio}/estado', [ReporteController::class, 'estado'])->name('reportes.estado');
+Route::get('/reportes/{folio}/comprobante', [ReporteController::class, 'comprobante'])->name('reportes.comprobante');
 
 // ---------- Acceso de administradores ----------
 // No hay ningún enlace público a /login: se entra escribiendo la dirección.

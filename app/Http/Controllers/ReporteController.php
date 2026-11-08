@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Colonia;
 use App\Models\Reporte;
 use App\Models\TipoReporte;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -116,5 +118,34 @@ class ReporteController extends Controller {
             'folio'      => $reporte->folio,
             'estado'     => $reporte->nombreEstado(),
         ]);
+    }
+
+    // Descarga el comprobante en PDF (solo si el reporte ya fue atendido y está completo)
+    public function comprobante($folio) {
+        $reporte = Reporte::with(['tipo', 'colonia'])->where('folio', strtoupper($folio))->first();
+
+        if ($reporte == null) {
+            return redirect()->route('seguimiento')
+                ->with('error', 'No se encontró ningún reporte con ese folio.');
+        }
+
+        // Mientras el reporte no esté atendido y completo, no se genera el PDF
+        if (! $reporte->tieneComprobante()) {
+            return redirect()->route('seguimiento', ['folio' => $reporte->folio])
+                ->with('error', 'El comprobante estará disponible cuando el reporte esté atendido.');
+        }
+
+        try {
+            Carbon::setLocale('es'); // para que la fecha salga en español
+            $pdf = Pdf::loadView('reportes.comprobante', compact('reporte'));
+            Log::info('Comprobante PDF generado', ['folio' => $reporte->folio]);
+
+            return $pdf->download('comprobante-' . $reporte->folio . '.pdf');
+        } catch (\Exception $e) {
+            Log::error('No se pudo generar el comprobante PDF', ['folio' => $reporte->folio, 'error' => $e->getMessage()]);
+
+            return redirect()->route('seguimiento', ['folio' => $reporte->folio])
+                ->with('error', 'No se pudo generar el comprobante. Intenta de nuevo.');
+        }
     }
 }

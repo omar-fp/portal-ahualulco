@@ -24,3 +24,8 @@
 .paginacion a:hover { background: #eaf0f7; }
 .paginacion .actual { background: #3a87b7; color: white; border-color: #3a87b7; }
 .paginacion .desactivado { color: #999; }
+a.boton, a.boton-chico { text-decoration: none; }
+a.boton-chico { display: inline-block; }
+.campo-causa { width: 100%; margin-top: 6px; }
+.form-estado { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.campo-causa { flex: 1 1 100%; order: 3; min-width: 220px; height: 70px; margin-top: 4px; }

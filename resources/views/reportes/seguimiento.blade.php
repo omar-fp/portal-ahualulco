@@ -24,6 +24,11 @@
                 <p><strong>Ubicación:</strong> {{ $reporte->calle }}, {{ $reporte->colonia->colonias }}</p>
                 <p><strong>Descripción:</strong> {{ $reporte->descripcion }}</p>
                 <p><strong>Fecha:</strong> {{ $reporte->created_at->format('d/m/Y H:i') }}</p>
+
+                {{-- El comprobante solo se ofrece cuando el reporte ya fue atendido --}}
+                @if ($reporte->tieneComprobante())
+                    <a href="{{ route('reportes.comprobante', $reporte->folio) }}" class="boton">Descargar comprobante (PDF)</a>
+                @endif
             </div>
         @endif
     </div>

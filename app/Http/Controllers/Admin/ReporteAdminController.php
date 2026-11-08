@@ -7,8 +7,7 @@ use App\Models\Reporte;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class ReporteAdminController extends Controller
-{
+class ReporteAdminController extends Controller {
     private $estados = [
         'pendiente'  => 'Pendiente',
         'en_proceso' => 'En proceso',
@@ -16,11 +15,9 @@ class ReporteAdminController extends Controller
     ];
 
     // Lista los reportes: el super ve todos; el de área, solo los de su tipo
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
         $usuario = $request->user();
 
-        // Collections: se cuenta cuántos reportes hay por estado para el resumen
         $todos = Reporte::query();
         if (! $usuario->esSuper()) {
             $todos->where('tipo_reporte_id', $usuario->tipo_reporte_id);
@@ -61,15 +58,38 @@ class ReporteAdminController extends Controller
                 ->with('error', 'No tienes permiso para modificar ese reporte.');
         }
 
+        // Se quitan las etiquetas HTML de la causa que escribe el administrador
+        $request->merge([
+            'causa' => trim(strip_tags((string) $request->input('causa'))),
+        ]);
+
         $request->validate([
             'estado' => 'required|in:pendiente,en_proceso,atendido',
+            // La causa es obligatoria solo cuando el reporte se marca como Atendido
+            'causa'  => 'required_if:estado,atendido|nullable|min:10|max:500',
         ], [
-            'required' => 'Selecciona un estado.',
-            'in'       => 'Selecciona un estado válido.',
+            'required'          => 'Selecciona un estado.',
+            'in'                => 'Selecciona un estado válido.',
+            'causa.required_if' => 'Para marcar el reporte como Atendido escribe qué se encontró (la causa).',
+            'causa.min'         => 'La causa debe tener al menos :min caracteres.',
+            'causa.max'         => 'La causa no debe tener más de :max caracteres.',
         ]);
 
         try {
             $reporte->estado = $request->estado;
+
+            if ($request->estado == 'atendido') {
+                $reporte->causa = $request->causa;
+
+                // La fecha de atención se guarda la primera vez que se marca como Atendido
+                if ($reporte->atendido_en == null) {
+                    $reporte->atendido_en = now();
+                }
+            } else {
+                // Si el reporte regresa a otro estado, ya no tiene fecha de atención
+                $reporte->atendido_en = null;
+            }
+
             $reporte->save();
         } catch (\Exception $e) {
             Log::error('No se pudo actualizar el estado del reporte', [
@@ -90,8 +110,7 @@ class ReporteAdminController extends Controller
     }
 
     // Elimina un reporte (la ruta ya es solo para el administrador general)
-    public function destroy(Request $request, Reporte $reporte)
-    {
+    public function destroy(Request $request, Reporte $reporte) {
         // Solo se pueden eliminar los reportes que ya fueron atendidos
         if ($reporte->estado != 'atendido') {
             return back()->with('error', 'Solo se pueden eliminar reportes con estado Atendido.');

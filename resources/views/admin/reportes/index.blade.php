@@ -61,13 +61,23 @@
                                     <form action="{{ route('admin.reportes.estado', $reporte) }}" method="POST" class="form-estado">
                                         @csrf
                                         @method('PATCH')
-                                        <select name="estado">
+                                        {{-- Al elegir "Atendido" aparece el cuadro para explicar qué se encontró --}}
+                                        <select name="estado"
+                                                onchange="this.form.querySelector('.campo-causa').style.display = (this.value == 'atendido') ? 'block' : 'none';">
                                             @foreach ($estados as $clave => $texto)
                                                 <option value="{{ $clave }}" {{ $reporte->estado == $clave ? 'selected' : '' }}>{{ $texto }}</option>
                                             @endforeach
                                         </select>
+                                        <textarea name="causa" class="campo-causa" rows="2" maxlength="500"
+                                                  placeholder="Se encontró... (explica la causa)"
+                                                  style="display: {{ $reporte->estado == 'atendido' ? 'block' : 'none' }};">{{ $reporte->causa }}</textarea>
                                         <button type="submit" class="boton-chico">Guardar</button>
                                     </form>
+
+                                    {{-- El PDF solo aparece cuando el reporte está atendido y completo --}}
+                                    @if ($reporte->tieneComprobante())
+                                        <a href="{{ route('reportes.comprobante', $reporte->folio) }}" target="_blank" class="boton-chico">PDF</a>
+                                    @endif
                                 </td>
                                 @if (auth()->user()->esSuper())
                                     <td>

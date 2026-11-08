@@ -9,6 +9,17 @@ use Illuminate\Support\Str;
 class Reporte extends Model {
     use HasFactory;
 
+    protected function casts(): array {
+        return [
+            'atendido_en' => 'date',
+        ];
+    }
+
+    // El comprobante PDF solo existe cuando el reporte ya fue atendido y tiene su causa y su fecha
+    public function tieneComprobante() {
+        return $this->estado == 'atendido' && $this->causa != null && $this->atendido_en != null;
+    }
+
     // Genera un folio de 8 caracteres que no exista en la base de datos
     public static function generarFolio() {
         $folio = strtoupper(Str::random(8));
